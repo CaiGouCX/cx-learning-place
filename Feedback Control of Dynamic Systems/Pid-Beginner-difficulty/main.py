@@ -32,17 +32,6 @@ def simulate(systemtype):
     else:
         raise ValueError("Unsupported system type. Choose 1, 2, or 3.")
 
-
-    '''times, temps, powers = [], [], []
-    for i in range(steps):
-        t = i * dt
-        temp = system.temperature
-        power = pid.compute(setpoint, temp)
-        temp = system.update(power, dt)
-        times.append(t)
-        temps.append(temp)
-        powers.append(power)'''
-
     # 正确的控制循环调用方式（单位匹配版）
     times, temps, powers = [], [], []
     for i in range(steps):
@@ -56,7 +45,7 @@ def simulate(systemtype):
         pid_output = pid.compute(1.0,norm_temp)  # 输出范围应该是 0~1
         # 限制 PID 输出在 0~1 区间，防止实际功率过大
         power = max(0.0, min(pid_output, 1.0)) * MAX_POWER
-        print(power)
+
         # 更新系统状态
         temp = system.update(power, dt)
         # 记录数据
