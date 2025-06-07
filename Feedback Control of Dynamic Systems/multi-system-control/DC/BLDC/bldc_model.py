@@ -89,10 +89,23 @@ class BLDC_MODEL:
 
         if mode == 'hall':
             return T_base
+
         elif mode == 'sinusoidal':
-            return T_base + k_fan * omega**2
+            # 防止 NaN/Inf，限制最大平方值
+            if not np.isfinite(omega):
+                omega = 0.0
+            omega_sq = min(omega ** 2, 1e6)
+            return T_base + k_fan * omega_sq
+
         elif mode == 'foc':
-            return T_base + k_fan * omega**2 + A_disturb * np.sin(2 * np.pi * f_disturb * t)
+            # 防止 NaN/Inf，限制最大平方值
+            if not np.isfinite(omega):
+                omega = 0.0
+            omega_sq = min(omega ** 2, 1e6)
+            return T_base + k_fan * omega_sq + A_disturb * np.sin(2 * np.pi * f_disturb * t)
+
+        else:
+            return T_base  # fallback：未知模式返回基础负载
 
     # -------------------------
     # 主状态更新函数
@@ -119,7 +132,7 @@ class BLDC_MODEL:
         self.omega += domega_dt * dt
         self.theta_e += self.omega * dt
         self.theta = self.theta_e % (2 * np.pi)  # 限制在 0~2π
-        #print(self.theta_e)
-
-
+        if np.isnan(self.theta_e) or np.isnan(self.omega):
+            print(f"⚠️ NaN Detected: θe={self.theta_e}, ω={self.omega}, TL={self.TL}")
+        
         return self.get_state()

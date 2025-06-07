@@ -19,6 +19,11 @@ class PID:
         self.integral = 0
         self.prev_error = 0
 
+
+    def set_max(self,maxv):
+        self.min_out = -maxv
+        self.max_out = maxv
+
     def compute(self, setpoint, measured_value):
         """
         计算PID输出
@@ -76,16 +81,10 @@ class PID:
         # 更新状态
         self.prev_error = error
         self.prev_output = output
-        
+        '''print(self.min_out,self.max_out)
+        if output == self.min_out or output == self.max_out:
+            print("⚠️ PID 输出触顶，可能不够推转！")'''
+
         return output
 
-'''    def compute(self, setpoint, measured):
-        error = setpoint - measured
-        self.integral += error * self.dt
-        derivative = (error - self.prev_error) / self.dt
-        output = self.kp*error + self.ki*self.integral + self.kd*derivative
-        if self.min_out is not None: output = max(self.min_out, output)
-        if self.max_out is not None: output = min(self.max_out, output)
-        self.prev_error = error
-        return output'''
 
